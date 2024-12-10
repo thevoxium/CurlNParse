@@ -17,6 +17,7 @@ std::string find_element_by_id(const std::string &html, const std::string &id);
 std::vector<std::string> find_elements_by_attr_val(const std::string &html,
                                                    const std::string &attr_name,
                                                    const std::string &attr_val);
+std::string get_element_text(const std::string &html, const std::string &tag);
 bool init();
 void cleanup();
 

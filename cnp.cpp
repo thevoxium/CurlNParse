@@ -160,7 +160,8 @@ std::string find_element_by_id(const std::string &html, const std::string &id) {
       size_t closePos = html.find(closingTag, end_pos);
 
       if (closePos != std::string::npos) {
-        return html.substr(pos, closePos + closingTag.length() - pos);
+        std::string element = html.substr(pos, closePos + closingTag.length() - pos);
+        return get_element_text(element);
       }
     }
     pos = end_pos + 1;
@@ -210,4 +211,15 @@ find_elements_by_attr_val(const std::string &html, const std::string &attr_name,
   return res;
 }
 
+std::string get_element_text(const std::string &html, const std::string &tag) {
+  std::string text = html;
+  text = std::regex_replace(text, std::regex("<script[^>]*>[^<]*</script>"), "");
+  text = std::regex_replace(text, std::regex("<style[^>]*>[^<]*</style>"), "");
+  text = std::regex_replace(text, std::regex("<[^>]+>"), " ");
+  text = std::regex_replace(text, std::regex("\\s+"), " ");
+  text = std::regex_replace(text, std::regex("^\\s+|\\s+$"), "");
+
+  return text;
 } // namespace cnp
+
+
