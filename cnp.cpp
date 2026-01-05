@@ -127,7 +127,8 @@ std::vector<std::string> find_elements_by_class(const std::string &html,
 
     if (std::regex_search(tag, class_pattern)) {
       size_t elementEnd = pos;
-      std::string elementStart = tag.substr(1, tag.find(" ") - 1);
+      size_t spacePos = tag.find_first_of(" >");
+      std::string elementStart = tag.substr(1, spacePos - 1);
       std::string closingTag = "</" + elementStart + ">";
       size_t closePos = html.find(closingTag, end_pos);
       if (closePos != std::string::npos) {
@@ -155,7 +156,8 @@ std::string find_element_by_id(const std::string &html, const std::string &id) {
     std::string tag = html.substr(pos, end_pos - pos + 1);
     if (std::regex_search(tag, id_pattern)) {
       size_t elementEnd = pos;
-      std::string elementStart = tag.substr(1, tag.find(" ") - 1);
+      size_t spacePos = tag.find_first_of(" >");
+      std::string elementStart = tag.substr(1, spacePos - 1);
       std::string closingTag = "</" + elementStart + ">";
       size_t closePos = html.find(closingTag, end_pos);
 
@@ -173,8 +175,12 @@ std::string find_element_by_id(const std::string &html, const std::string &id) {
 std::vector<std::string>
 find_elements_by_attr_val(const std::string &html, const std::string &attr_name,
                           const std::string &attr_val) {
-  std::regex attr_pattern(attr_name + "\\s*=\\s*([\"]?)\\b" + attr_val +
-                          "\\b([\"]?)");
+  
+                            
+  std::regex attr_pattern(
+    attr_name + R"(\s*=\s*["'])" + attr_val +
+                          R"(["'])",
+                        std::regex::icase);
   size_t pos = 0;
 
   std::vector<std::string> res;
@@ -187,7 +193,8 @@ find_elements_by_attr_val(const std::string &html, const std::string &attr_name,
     std::string tag = html.substr(pos, end_pos - pos + 1);
     if (std::regex_search(tag, attr_pattern)) {
       size_t elementEnd = pos;
-      std::string elementStart = tag.substr(1, tag.find(" ") - 1);
+      size_t spacePos = tag.find_first_of(" >");
+      std::string elementStart = tag.substr(1, spacePos - 1);
 
       bool is_self_closing = (html[end_pos - 1] == '/') || // format: <img/>
                              (elementStart == "img" || elementStart == "br" ||
@@ -220,19 +227,21 @@ std::string get_element_text(const std::string &html, const std::string &tag) {
   text = std::regex_replace(text, std::regex("^\\s+|\\s+$"), "");
 
   return text;
+}
+std::vector<std::string> extractUrls(const std::string& text) {
+      std::vector<std::string> urls;
+      std::regex urlPattern(R"((https?://[^\s\"<>]+))");
+      auto wordsBegin = std::sregex_iterator(text.begin(), text.end(), urlPattern);
+      auto wordsEnd = std::sregex_iterator();
+
+      for (std::sregex_iterator i = wordsBegin; i != wordsEnd; ++i) {
+          std::smatch match = *i;
+          urls.push_back(match.str());
+      }
+      return urls;
+    
 } // namespace cnp
 
-    std::vector<std::string> extractUrls(const std::string& text) {
-        std::vector<std::string> urls;
-        std::regex urlPattern(R"((https?://[^\s\"<>]+))");
-        auto wordsBegin = std::sregex_iterator(text.begin(), text.end(), urlPattern);
-        auto wordsEnd = std::sregex_iterator();
-
-        for (std::sregex_iterator i = wordsBegin; i != wordsEnd; ++i) {
-            std::smatch match = *i;
-            urls.push_back(match.str());
-        }
-        return urls;
-    }
+    
 }
 // namespace cnp

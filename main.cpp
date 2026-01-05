@@ -4,8 +4,28 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include <cassert>
 int main() {
+
+  std::string html = R"(
+      <html>
+        <body>
+          <a href="x" target="_blank">A</a>
+          <a href="y" target="_self">B</a>
+          <div target="_blank">C</div>
+          <img src="anything-at-all" target="_blank"/>
+        </body>
+      </html>
+
+  )";
+  auto res = cnp::find_elements_by_attr_val(html, "target", "_blank");
+  assert(res.size() == 3);
+  assert(res[0].find("target=\"_blank\"") != std::string::npos);
+  assert(res[1].find("target=\"_blank\"") != std::string::npos);
+  assert(res[2].find("target=\"_blank\"") != std::string::npos);
+
+  std::cout<<"TEST PASSED: find_elements_by_attr_val\n";
+  
   std::string url = "https://lichess.org/";
 
   cnp::init();
@@ -43,5 +63,6 @@ int main() {
 
   cnp::cleanup();
 
+  
   return 0;
 }
